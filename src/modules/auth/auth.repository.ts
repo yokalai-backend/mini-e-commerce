@@ -1,9 +1,8 @@
-// Don't forget to import the queries helper up here!
+import registerRepo from "../../cores/repository/auth/registerRepo";
+import { RegisterInput } from "./auth.types";
 
-const exrName = {
-  exf1: async () => {
-    // Code goes here
-  },
+const authRepo = {
+  register: async (input: RegisterInput) => registerRepo(input),
   exf2: async () => {
     // Code goes here
   },
@@ -18,4 +17,4 @@ const exrName = {
   },
 };
 
-export default exrName;
+export default authRepo;
