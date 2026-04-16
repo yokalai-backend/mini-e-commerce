@@ -1,15 +1,17 @@
 import { FastifyInstance } from "fastify";
 import verifyToken from "../../cores/utils/token/verify.token";
-import { products } from "./products.controller";
+import { product, products } from "./products.controller";
 import validateQuery from "../../cores/utils/preValidation/validate.query";
 import { paginationSchema } from "../../shared/schema";
+import validateParams from "../../cores/utils/preValidation/validate.params";
+import { productIdSchema } from "./products.schema";
 
 export default function productsRoute(app: FastifyInstance) {
   app.register(verifyToken);
 
   app.get("/", { preValidation: validateQuery(paginationSchema) }, products);
 
-  app.post("/ex", () => console.log("Example"));
+  app.get("/:id", { preValidation: validateParams(productIdSchema) }, product);
 
   app.delete("/ex", () => console.log("Example"));
 

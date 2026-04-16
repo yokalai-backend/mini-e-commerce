@@ -15,6 +15,7 @@ export default function generateDeviceId(
       httpOnly: true,
       sameSite: "lax",
       secure: false,
+      maxAge: 60 * 60 * 24 * 30,
     });
   }
 

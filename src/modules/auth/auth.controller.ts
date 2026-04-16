@@ -56,6 +56,8 @@ export async function refreshToken(req: FastifyRequest, rep: FastifyReply) {
 
   const deviceId = req.cookies.deviceId;
 
+  console.log("token: ", token, "deviceId: ", deviceId);
+
   const { newAccessToken, newRefreshToken } = await refreshTokenService(
     token,
     deviceId,
