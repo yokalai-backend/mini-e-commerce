@@ -40,11 +40,7 @@ export const registerSchema = z.object({
     ),
 });
 
-export type RegisterProps = z.infer<typeof registerSchema>;
-
 export const loginSchema = z.object({
   password: z.string({ error: "Password is needed" }),
   email: z.string({ error: "Email is needed" }),
 });
-
-export type LoginProps = z.infer<typeof loginSchema>;

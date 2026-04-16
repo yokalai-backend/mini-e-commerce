@@ -1,11 +1,9 @@
-import registerRepo from "../../cores/repository/auth/registerRepo";
-import { RegisterInput } from "./auth.types";
+import { registerRepo, loginRepo } from "../../cores/repository/auth";
+import { RegisterInput, LoginInput } from "./auth.types";
 
 const authRepo = {
   register: async (input: RegisterInput) => registerRepo(input),
-  exf2: async () => {
-    // Code goes here
-  },
+  login: async (input: LoginInput) => loginRepo(input),
   exf3: async () => {
     // Code goes here
   },

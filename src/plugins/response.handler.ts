@@ -3,7 +3,7 @@ import fp from "fastify-plugin";
 
 declare module "fastify" {
   interface FastifyReply {
-    ok(message: string, data: any, statusCode?: number): FastifyReply;
+    ok(message: string, data?: any, statusCode?: number): FastifyReply;
     notok(
       message: string | any[],
       code: string,
