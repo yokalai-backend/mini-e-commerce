@@ -2,7 +2,11 @@ import bc from "bcrypt";
 import authRepo from "./auth.repository";
 import { LoginInput, RegisterInput } from "./auth.types";
 import Errors from "../../cores/errors/errors";
-import { loginHelper, refreshTokenHelper } from "../../cores/repository/auth";
+import {
+  loginHelper,
+  logoutHelper,
+  refreshTokenHelper,
+} from "../../cores/repository/auth";
 
 export async function registerService({
   username,
@@ -44,23 +48,14 @@ export async function loginService(input: LoginInput, deviceId: string) {
   return await loginHelper(payload, deviceId);
 }
 
-export async function exsName3() {
-  // Code goes here
+export async function logoutService(token: string) {
+  if (!token) throw Errors.authorization("Login first");
+
+  await logoutHelper(token);
 }
 
 export async function refreshTokenService(token: string, deviceId: string) {
-  console.log(
-    "At refresh token check if input corrects: ",
-    token,
-    " and ",
-    deviceId,
-  );
-
   if (!token || !deviceId) throw Errors.badRequest("Login first");
 
   return await refreshTokenHelper(token, deviceId);
-}
-
-export async function exsName5() {
-  // Code goes here
 }

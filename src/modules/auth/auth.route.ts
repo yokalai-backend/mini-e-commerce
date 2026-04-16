@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { login, refreshToken, register } from "./auth.controller";
+import { login, logout, refreshToken, register } from "./auth.controller";
 import validateBody from "../../cores/utils/preValidation/validate.body";
 import { loginSchema, registerSchema } from "./auth.schema";
 
@@ -12,9 +12,7 @@ export default function authRoute(app: FastifyInstance) {
 
   app.post("/login", { preValidation: validateBody(loginSchema) }, login);
 
-  app.delete("/ex", () => console.log("Example"));
+  app.post("/logout", logout);
 
   app.post("/refresh-token", refreshToken);
-
-  app.put("/ex", () => console.log("Example"));
 }

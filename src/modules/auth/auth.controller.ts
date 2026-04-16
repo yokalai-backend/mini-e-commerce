@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import {
   loginService,
+  logoutService,
   refreshTokenService,
   registerService,
 } from "./auth.service";
@@ -35,8 +36,19 @@ export async function login(
   rep.ok("Login successful", { accessToken });
 }
 
-export async function excName3(req: FastifyRequest, rep: FastifyReply) {
-  // Code goes here
+export async function logout(req: FastifyRequest, rep: FastifyReply) {
+  const token = req.cookies.refreshToken;
+
+  await logoutService(token);
+
+  rep.clearCookie("refreshToken", {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+  });
+
+  rep.ok("Logout successful");
 }
 
 export async function refreshToken(req: FastifyRequest, rep: FastifyReply) {
@@ -58,8 +70,4 @@ export async function refreshToken(req: FastifyRequest, rep: FastifyReply) {
   });
 
   rep.ok("Received new access token", { accessToken: newAccessToken });
-}
-
-export async function excName5(req: FastifyRequest, rep: FastifyReply) {
-  // Code goes here
 }

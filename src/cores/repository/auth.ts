@@ -51,6 +51,19 @@ export async function loginHelper(payload: TokenPayload, deviceId: string) {
   return { accessToken, refreshToken };
 }
 
+export async function logoutHelper(token: string) {
+  const { jti } = jwt.verify(token, env.REFRESH_SECRET, {
+    ignoreExpiration: true,
+  }) as { jti: string };
+
+  const deleteToken = await queryOne(
+    `DELETE FROM refresh_tokens WHERE jti = $1 RETURNING id`,
+    [jti],
+  );
+
+  if (!deleteToken) throw Errors.badRequest("Already logout");
+}
+
 export async function refreshTokenHelper(token: string, deviceId: string) {
   try {
     const { id, jti } = jwt.verify(token, env.REFRESH_SECRET) as {
