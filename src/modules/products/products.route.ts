@@ -23,8 +23,4 @@ export default function productsRoute(app: FastifyInstance) {
     },
     cart,
   );
-
-  app.patch("/ex", () => console.log("Example"));
-
-  app.put("/ex", () => console.log("Example"));
 }

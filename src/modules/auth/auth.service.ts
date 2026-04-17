@@ -1,12 +1,12 @@
 import bc from "bcrypt";
-import authRepo from "./auth.repository";
-import { LoginInput, RegisterInput } from "./auth.types";
-import Errors from "../../cores/errors/errors";
+import authRepo from "@auth/auth.repository";
+import Errors from "@errors/errors";
+import { LoginInput, RegisterInput } from "@auth/auth.types";
 import {
   loginHelper,
   logoutHelper,
   refreshTokenHelper,
-} from "../../cores/repository/auth";
+} from "@repository/auth";
 
 export async function registerService({
   username,

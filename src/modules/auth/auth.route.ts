@@ -1,7 +1,7 @@
+import validateBody from "@utils/preValidation/validate.body";
 import { FastifyInstance } from "fastify";
-import { login, logout, refreshToken, register } from "./auth.controller";
-import validateBody from "../../cores/utils/preValidation/validate.body";
-import { loginSchema, registerSchema } from "./auth.schema";
+import { login, logout, refreshToken, register } from "@auth/auth.controller";
+import { loginSchema, registerSchema } from "@auth/auth.schema";
 
 export default function authRoute(app: FastifyInstance) {
   app.post(

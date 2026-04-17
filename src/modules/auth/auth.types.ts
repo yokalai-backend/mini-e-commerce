@@ -1,4 +1,4 @@
-import { Roles } from "../../shared/types";
+import { Roles } from "@shared/types";
 
 export interface RegisterInput {
   username: string;

@@ -1,7 +1,7 @@
-import Errors from "../../cores/errors/errors";
-import productsRepo from "./products.repository";
-import { productDetailedParser } from "./products.schema";
-import { AddToCart } from "./products.type";
+import Errors from "@errors/errors";
+import productsRepo from "@products/products.repository";
+import { productDetailedParser } from "@products/products.schema";
+import { AddToCart } from "@products/products.type";
 
 export async function productsService({
   page,

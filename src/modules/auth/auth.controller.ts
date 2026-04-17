@@ -1,12 +1,12 @@
+import generateDeviceId from "@utils/userHeader/generate.device.id";
 import { FastifyRequest, FastifyReply } from "fastify";
 import {
   loginService,
   logoutService,
   refreshTokenService,
   registerService,
-} from "./auth.service";
-import { LoginInput, RegisterInput } from "./auth.types";
-import generateDeviceId from "../../cores/utils/userHeader/generate.device.id";
+} from "@auth/auth.service";
+import { LoginInput, RegisterInput } from "@auth/auth.types";
 
 export async function register(
   req: FastifyRequest<{ Body: RegisterInput }>,

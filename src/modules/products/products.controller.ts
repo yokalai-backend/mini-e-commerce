@@ -3,7 +3,7 @@ import {
   cartService,
   productService,
   productsService,
-} from "./products.service";
+} from "@products/products.service";
 
 export async function products(
   req: FastifyRequest<{ Querystring: { page: number; limit: number } }>,
