@@ -13,3 +13,9 @@ export type ProductDetailed = {
   rating: number;
   total_solds: number;
 };
+
+export type AddToCart = {
+  userId: string;
+  productId: string;
+  quantity: number;
+};

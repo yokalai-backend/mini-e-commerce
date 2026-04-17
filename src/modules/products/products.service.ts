@@ -1,6 +1,7 @@
 import Errors from "../../cores/errors/errors";
 import productsRepo from "./products.repository";
 import { productDetailedParser } from "./products.schema";
+import { AddToCart } from "./products.type";
 
 export async function productsService({
   page,
@@ -22,8 +23,8 @@ export async function productService(productId: string) {
   return productDetailedParser.parse(result);
 }
 
-export async function exsName3() {
-  // Code goes here
+export async function cartService(input: AddToCart) {
+  return await productsRepo.cart(input);
 }
 
 export async function exsName4() {

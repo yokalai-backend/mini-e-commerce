@@ -1,5 +1,9 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { productService, productsService } from "./products.service";
+import {
+  cartService,
+  productService,
+  productsService,
+} from "./products.service";
 
 export async function products(
   req: FastifyRequest<{ Querystring: { page: number; limit: number } }>,
@@ -19,8 +23,20 @@ export async function product(
   rep.ok("Received product", result);
 }
 
-export async function excName3(req: FastifyRequest, rep: FastifyReply) {
-  // Code goes here
+export async function cart(
+  req: FastifyRequest<{
+    Params: { id: string };
+    Querystring: { quantity: number };
+  }>,
+  rep: FastifyReply,
+) {
+  const msgResult = await cartService({
+    userId: req.user.id,
+    productId: req.params.id,
+    quantity: req.query.quantity,
+  });
+
+  rep.ok(msgResult);
 }
 
 export async function excName4(req: FastifyRequest, rep: FastifyReply) {

@@ -39,3 +39,9 @@ export const productDetailedParser = z
   }));
 
 export type ProductDetailedProps = z.infer<typeof productDetailedParser>;
+
+export const amountProductSchema = z.object({
+  quantity: z.coerce
+    .number({ error: "Quantity needed" })
+    .min(1, { error: "Quantity can't be less than 1" }),
+});
