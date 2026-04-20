@@ -12,7 +12,9 @@ export async function productsService({
 }) {
   const offset = (page - 1) * limit;
 
-  return await productsRepo.products({ limit, offset });
+  return productDetailedParser.parse(
+    await productsRepo.products({ limit, offset }),
+  );
 }
 
 export async function productService(productId: string) {
@@ -21,10 +23,6 @@ export async function productService(productId: string) {
   if (!result) throw Errors.notFound("Product not found");
 
   return productDetailedParser.parse(result);
-}
-
-export async function cartService(input: AddToCart) {
-  return await productsRepo.cart(input);
 }
 
 export async function exsName4() {

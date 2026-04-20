@@ -1,9 +1,13 @@
 export type Products = {
   id: string;
+  user_id: string;
   name: string;
   price: number;
   stock: number;
-  description: string;
+  is_sold: boolean;
+  created_at: Date;
+  updated_at: Date;
+  image: string;
 };
 
 export type ProductDetailed = {
