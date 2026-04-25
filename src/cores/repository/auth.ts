@@ -1,19 +1,12 @@
-import { queryOne } from "../utils/query/query";
-import {
-  signAccessToken,
-  signRefreshToken,
-} from "../utils/token/generate.token";
-import {
-  RegisterInput,
-  LoginInput,
-  TokenPayload,
-} from "../../modules/auth/auth.types";
-import { Roles } from "../../shared/types";
+import env from "@config/env";
+import Errors from "@errors/errors";
+import { queryOne } from "@utils/query/query";
+import { signAccessToken, signRefreshToken } from "@utils/token/generate.token";
+import { RegisterInput, LoginInput, TokenPayload } from "@auth/auth.types";
+import { Roles } from "@shared/types";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
-import env from "../config/env";
-import Errors from "../errors/errors";
 
-export async function registerRepo(input: RegisterInput): Promise<void> {
+export async function registerHelper(input: RegisterInput): Promise<void> {
   const { username, password, email } = input;
 
   await queryOne(
@@ -22,7 +15,7 @@ export async function registerRepo(input: RegisterInput): Promise<void> {
   );
 }
 
-export async function loginRepo(input: LoginInput) {
+export async function loginHelper(input: LoginInput) {
   const { email } = input;
 
   return await queryOne<{
@@ -32,16 +25,17 @@ export async function loginRepo(input: LoginInput) {
     hash: string;
   }>(
     `SELECT id, username, role, hash FROM users WHERE email = $1 AND is_active = true`,
-    [email],
+    [email], // Only able to login if the user still active.
   );
 }
 
-export async function loginHelper(payload: TokenPayload, deviceId: string) {
-  const accessToken = signAccessToken(payload, "5m");
+// Could handle multiple device login but limited only 5 per account.
+export async function handleLogin(payload: TokenPayload, deviceId: string) {
+  const accessToken = signAccessToken(payload); // Generate a new accessToken.
 
-  await queryOne("DELETE FROM refresh_tokens WHERE device_id = $1", [deviceId]); // Delete previous token
+  await queryOne("DELETE FROM refresh_tokens WHERE device_id = $1", [deviceId]); // Delete previous refresh token.
 
-  const { refreshToken, jti } = signRefreshToken({ id: payload.id });
+  const { refreshToken, jti } = signRefreshToken({ id: payload.id }); // Generate a new token while returning the jti so we can save the jti into database.
 
   await queryOne(
     `INSERT INTO refresh_tokens (user_id, jti, device_id, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
@@ -51,17 +45,13 @@ export async function loginHelper(payload: TokenPayload, deviceId: string) {
   return { accessToken, refreshToken };
 }
 
-export async function logoutHelper(token: string) {
-  const { jti } = jwt.verify(token, env.REFRESH_SECRET, {
-    ignoreExpiration: true,
-  }) as { jti: string };
-
+export async function handleLogout(deviceId: string) {
   const deleteToken = await queryOne(
-    `DELETE FROM refresh_tokens WHERE jti = $1 RETURNING id`,
-    [jti],
-  );
+    `DELETE FROM refresh_tokens WHERE device_id = $1 RETURNING id`,
+    [deviceId],
+  ); // Delete the refresh tokens from this device id.
 
-  if (!deleteToken) throw Errors.badRequest("Already logout");
+  if (!deleteToken) throw Errors.badRequest("User already logout");
 }
 
 export async function refreshTokenHelper(token: string, deviceId: string) {
@@ -71,34 +61,22 @@ export async function refreshTokenHelper(token: string, deviceId: string) {
       jti: string;
     };
 
-    const checkToken = await queryOne(
-      `SELECT id FROM refresh_tokens WHERE user_id = $1 AND revoked = false AND expires_at > NOW()`,
-      [id],
-    );
-
-    if (!checkToken) {
-      await queryOne(`DELETE FROM refresh_tokens WHERE device_id = $1`, [
-        deviceId,
-      ]);
-
-      throw Errors.authorization("Request declined try to re-login");
-    }
-
-    const revoked = await queryOne(
-      `DELETE FROM refresh_tokens WHERE jti = $1 RETURNING *`,
+    const tokenExists = await queryOne(
+      `SELECT id FROM refresh_tokens WHERE jti = $1 AND revoked = false AND expires_at > NOW()`,
       [jti],
-    );
+    ); // Check out if the token has been reused or if it's not valid in the database.
 
-    if (!revoked) {
+    if (!tokenExists) {
       await queryOne(`DELETE FROM refresh_tokens WHERE user_id = $1`, [id]);
 
-      throw Errors.authorization(
-        "Token reuse detected, force logout",
-        "TOKEN_REUSE",
-      );
-    }
+      throw Errors.authorization("Request denied, please login again");
+    } // If the token has been revoked and someone try to use it or if it's not recognized by the database then force logout to all devices connected with the user, for the security purpose.
 
-    const payload = await queryOne<{
+    await queryOne(`DELETE FROM refresh_tokens WHERE jti = $1 RETURNING *`, [
+      jti,
+    ]);
+
+    const accessTokenPayload = await queryOne<{
       id: string;
       username: string;
       role: Roles;
@@ -107,14 +85,14 @@ export async function refreshTokenHelper(token: string, deviceId: string) {
       [id],
     );
 
-    const newAccessToken = signAccessToken(payload);
+    const newAccessToken = signAccessToken(accessTokenPayload);
 
     const refToken = signRefreshToken({ id });
 
     await queryOne(
       `INSERT INTO refresh_tokens (user_id, jti, device_id, expires_at) VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
       [id, refToken.jti, deviceId],
-    ); // Rotation
+    ); // Rotation, making a new refresh token to be use.
 
     return { newAccessToken, newRefreshToken: refToken.refreshToken };
   } catch (error) {

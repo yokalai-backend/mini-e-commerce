@@ -3,8 +3,8 @@ import authRepo from "@auth/auth.repository";
 import Errors from "@errors/errors";
 import { LoginInput, RegisterInput } from "@auth/auth.types";
 import {
-  loginHelper,
-  logoutHelper,
+  handleLogin,
+  handleLogout,
   refreshTokenHelper,
 } from "@repository/auth";
 
@@ -19,7 +19,7 @@ export async function registerService({
     return await authRepo.register({ username, password: hashPassword, email });
   } catch (error: any) {
     if (error.code === "23505") {
-      throw Errors.conflict("Email not available", "EMAIL_DUPLICATE");
+      throw Errors.conflict("Email already exists", "EMAIL_DUPLICATE");
     }
 
     throw error;
@@ -45,17 +45,18 @@ export async function loginService(input: LoginInput, deviceId: string) {
 
   const { hash, ...payload } = result;
 
-  return await loginHelper(payload, deviceId);
+  return await handleLogin(payload, deviceId);
 }
 
-export async function logoutService(token: string) {
-  if (!token) throw Errors.authorization("Login first");
+export async function logoutService(deviceId: string) {
+  if (!deviceId)
+    throw Errors.authorization("Session already expired, please login again");
 
-  await logoutHelper(token);
+  await handleLogout(deviceId);
 }
 
 export async function refreshTokenService(token: string, deviceId: string) {
-  if (!token || !deviceId) throw Errors.badRequest("Login first");
+  if (!token || !deviceId) throw Errors.badRequest("Please login first");
 
   return await refreshTokenHelper(token, deviceId);
 }

@@ -1,5 +1,6 @@
-import AppError from "./app.error";
+import AppError from "@errors/app.error";
 
+// Well you can guess i'm trying to declaring some errors template so i could use it later.
 const Errors = {
   badRequest: (msg: string, code?: string) =>
     new AppError(msg, code ?? "BAD_REQUEST", 400),

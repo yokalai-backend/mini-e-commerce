@@ -1,9 +1,9 @@
-import pool from "../config/db";
-import Errors from "../errors/errors";
-import { queryOne, queryMany } from "../utils/query/query";
+import pool from "@config/db";
+import Errors from "@errors/errors";
 
-export async function ordersHelper(userId: string) {
-  const client = await pool.connect();
+// This is where the crucial part is, so I use transaction query for this one.
+export async function orderProductsHelper(userId: string) {
+  const client = await pool.connect(); // We took 1 connection just for handle all of this.
 
   try {
     await client.query("BEGIN");
@@ -11,14 +11,14 @@ export async function ordersHelper(userId: string) {
     const { rows: cartProducts } = await client.query(
       `SELECT product_id, quantity FROM user_cart WHERE user_id = $1`,
       [userId],
-    );
+    ); // Get all the products inside of user's cart.
 
     if (cartProducts.length === 0) throw Errors.badRequest("Cart empty");
 
     const ordersValid = [];
     let total = 0;
 
-    // 1. VALIDATE + HITUNG
+    // Looping to each product inside the user's cart to check if it's valid or not.
     for (const item of cartProducts) {
       const { rows } = await client.query(
         `SELECT price, stock 
@@ -26,14 +26,14 @@ export async function ordersHelper(userId: string) {
          WHERE id = $1 
          FOR UPDATE`,
         [item.product_id],
-      );
+      ); // Lock product with this id rows, so nobody could modify it until the transaction finish.
 
       if (rows.length === 0) throw Errors.badRequest("Product not found");
 
       const product = rows[0];
 
       if (item.quantity > product.stock)
-        throw Errors.badRequest("Stock not enough");
+        throw Errors.badRequest("Stock does not enough", "INSUFFICIENT_STOCK");
 
       const subtotal = product.price * item.quantity;
       total += subtotal;
@@ -45,18 +45,16 @@ export async function ordersHelper(userId: string) {
         subtotal,
       });
     }
-    console.log(ordersValid);
-    // 2. INSERT ORDER (1x)
+
     const { rows: orderRows } = await client.query(
       `INSERT INTO orders (user_id, total_price, status) 
        VALUES ($1, $2, 'pending') 
        RETURNING id`,
       [userId, total],
-    );
+    ); // Create the order, it just calculate the total_price.
 
     const orderId = orderRows[0].id;
 
-    // 3. INSERT ORDER ITEMS + UPDATE STOCK
     for (const item of ordersValid) {
       await client.query(
         `INSERT INTO order_items 
@@ -73,14 +71,14 @@ export async function ordersHelper(userId: string) {
       );
     }
 
-    // 4. CLEAR CART
-    await client.query(`DELETE FROM user_cart WHERE user_id = $1`, [userId]);
+    await client.query(`DELETE FROM user_cart WHERE user_id = $1`, [userId]); // Clean the user's cart afterward;
 
     await client.query("COMMIT");
 
     return { orderId, total };
   } catch (error) {
     await client.query("ROLLBACK");
+
     throw error;
   } finally {
     client.release();

@@ -1,39 +1,29 @@
-import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
+import env from "@config/env";
+import Errors from "@errors/errors";
+import { Roles } from "@shared/types";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
-import fp from "fastify-plugin";
-import Errors from "../../errors/errors";
-import env from "../../config/env";
-import { Roles } from "../../../shared/types";
 
-async function verifyToken(app: FastifyInstance) {
-  app.addHook("preHandler", async (req: FastifyRequest, rep: FastifyReply) => {
-    const headers = req.headers.authorization;
+// A basic token verifying where i use cookies to make it simpler and safer, it's not a plugin tho because i want to seperate some endroutes to be strict and some are not.
+export default async function verifyToken(req: any, rep: any) {
+  const token = req.cookies.accessToken;
 
-    if (!headers) throw Errors.authorization("No token provided", "NO_TOKEN");
+  if (!token) throw Errors.authorization("No token provided", "NO_TOKEN");
 
-    if (!headers.startsWith("Bearer "))
-      throw Errors.authorization("Token format invalid", "TOKEN_INVALID");
+  try {
+    const decoded = jwt.verify(token, env.ACCESS_SECRET) as {
+      id: string;
+      username: string;
+      role: Roles;
+    };
 
-    const token = headers.split(" ")[1];
+    req.user = decoded;
+  } catch (error) {
+    if (error instanceof TokenExpiredError)
+      throw Errors.authorization("Token expired", "TOKEN_EXPIRED");
 
-    try {
-      const decoded = jwt.verify(token, env.ACCESS_SECRET) as {
-        id: string;
-        username: string;
-        role: Roles;
-      };
+    if (error instanceof JsonWebTokenError)
+      throw Errors.authorization("Invalid token", "TOKEN_INVALID");
 
-      req.user = decoded;
-    } catch (error) {
-      if (error instanceof TokenExpiredError)
-        throw Errors.authorization("Token expired", "TOKEN_EXPIRED");
-
-      if (error instanceof JsonWebTokenError)
-        throw Errors.authorization("Token invalid", "INVALID_TOKEN");
-
-      throw error;
-    }
-  });
+    throw error;
+  }
 }
-
-export default fp(verifyToken);

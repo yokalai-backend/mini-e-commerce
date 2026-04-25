@@ -1,9 +1,9 @@
-import { registerRepo, loginRepo } from "@repository/auth";
+import { loginHelper, registerHelper } from "@repository/auth";
 import { RegisterInput, LoginInput } from "@auth/auth.types";
 
 const authRepo = {
-  register: async (input: RegisterInput) => registerRepo(input),
-  login: async (input: LoginInput) => loginRepo(input),
+  register: async (input: RegisterInput) => registerHelper(input),
+  login: async (input: LoginInput) => loginHelper(input),
 };
 
 export default authRepo;

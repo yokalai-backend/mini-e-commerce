@@ -14,5 +14,5 @@ export default function authRoute(app: FastifyInstance) {
 
   app.post("/logout", logout);
 
-  app.post("/refresh-token", refreshToken);
+  app.post("/refresh", refreshToken);
 }

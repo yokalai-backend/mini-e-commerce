@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import crypto from "crypto";
 
+// Generate a unique device id for supporting multi device login, generate new if user doesn't have one or it's been expired where the life session is 30 days.
 export default function generateDeviceId(
   req: FastifyRequest,
   rep: FastifyReply,

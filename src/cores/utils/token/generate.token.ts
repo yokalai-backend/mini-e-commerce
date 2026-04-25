@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import env from "../../config/env";
-import { TokenPayload } from "../../../modules/auth/auth.types";
+import env from "@config/env";
+import { TokenPayload } from "@auth/auth.types";
 
-export function signAccessToken(payload: TokenPayload, expires?: any) {
+// Well as you can see these two function are the generator modules for helps me generate access and refresh tokens, this is crucial and make the codes cleaner.
+export function signAccessToken(payload: TokenPayload) {
   return jwt.sign(payload, env.ACCESS_SECRET, {
-    expiresIn: expires || "15m",
+    expiresIn: "15m",
   });
 }
 

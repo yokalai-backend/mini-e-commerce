@@ -1,7 +1,18 @@
 import Errors from "@errors/errors";
 import productsRepo from "@products/products.repository";
-import { productDetailedParser } from "@products/products.schema";
-import { AddToCart } from "@products/products.type";
+import {
+  AddProductProps,
+  productsDetailsParser,
+  productDetailParser,
+} from "@products/products.schema";
+
+export async function productService(productId: string) {
+  const res = await productsRepo.product(productId);
+
+  if (!res.id) throw Errors.notFound("Product not found");
+
+  return productsDetailsParser.parse(res);
+}
 
 export async function productsService({
   page,
@@ -12,23 +23,14 @@ export async function productsService({
 }) {
   const offset = (page - 1) * limit;
 
-  return productDetailedParser.parse(
+  return productDetailParser.parse(
     await productsRepo.products({ limit, offset }),
   );
 }
 
-export async function productService(productId: string) {
-  const result = await productsRepo.product(productId);
-
-  if (!result) throw Errors.notFound("Product not found");
-
-  return productDetailedParser.parse(result);
-}
-
-export async function exsName4() {
-  // Code goes here
-}
-
-export async function exsName5() {
-  // Code goes here
+export async function addProductService(
+  userId: string,
+  product: AddProductProps,
+) {
+  return await productsRepo.addProduct(userId, product);
 }

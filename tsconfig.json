@@ -8,9 +8,10 @@
       "@auth/*": ["modules/auth/*"],
       "@user/*": ["modules/user/*"],
       "@products/*": ["modules/products/*"],
-      "@order/*": ["cores/orders/*"],
+      "@orders/*": ["modules/orders/*"],
       "@repository/*": ["cores/repository/*"],
-      "@shared/*": ["shared/*"]
+      "@shared/*": ["shared/*"],
+      "@cart/*": ["modules/cart/*"]
     },
     /* Visit https://aka.ms/tsconfig to read more about this file */
 

@@ -1,3 +1,4 @@
+// This are error class it used for helps me handling errors in a clean way and consistent.
 export default class AppError extends Error {
   code: string;
   statusCode: number;

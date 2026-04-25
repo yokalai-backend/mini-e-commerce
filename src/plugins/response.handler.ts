@@ -8,6 +8,7 @@ declare module "fastify" {
       message: string | any[],
       code: string,
       statusCode?: number,
+      messages?: string[],
     ): FastifyReply;
   }
 }
@@ -32,8 +33,14 @@ function fastifyResponse(app: FastifyInstance) {
       message: string,
       code: string,
       statusCode: number = 500,
+      messages: string[],
     ) {
-      return this.code(statusCode).send({ success: false, message, code });
+      return this.code(statusCode).send({
+        success: false,
+        message,
+        messages,
+        code,
+      });
     },
   );
 }

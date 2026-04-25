@@ -2,23 +2,28 @@ import fastify, { FastifyInstance } from "fastify";
 import authRoute from "./modules/auth/auth.route";
 import responseHandler from "./plugins/response.handler";
 import globalErrors from "./cores/errors/global.errors";
-import cookie from "fastify-cookie";
+import cookie from "@fastify/cookie";
 import productsRoute from "./modules/products/products.route";
 import ordersRoute from "./modules/orders/orders.route";
 import cartRoute from "modules/cart/cart.route";
 import fastifyCors from "@fastify/cors";
+import userRoute from "@user/user.route";
 
 export default async function buildApp() {
-  const app = await fastify();
+  const app = fastify();
 
   app.register(responseHandler);
   app.register(cookie);
-  app.register(fastifyCors);
+  app.register(fastifyCors, {
+    credentials: true,
+    origin: "http://localhost:3000",
+  });
 
   app.register(authRoute, { prefix: "/auth" });
   app.register(productsRoute, { prefix: "/products" });
   app.register(ordersRoute, { prefix: "/orders" });
   app.register(cartRoute, { prefix: "/cart" });
+  app.register(userRoute, { prefix: "/user" });
 
   app.setErrorHandler(async (error: any, req: any, rep: any) =>
     globalErrors(error, rep),

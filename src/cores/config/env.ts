@@ -3,6 +3,7 @@ config();
 
 import { z } from "zod";
 
+// OF COURSE ZOD for a better safety especially in crucial part such like this env.
 const env = z.object({
   DB_USERNAME: z.string(),
   DB_HOST: z.string(),

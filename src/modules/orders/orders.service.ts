@@ -1,6 +1,6 @@
-import orderRepo from "./orders.repository";
+import ordersRepo from "./orders.repository";
 export async function ordersService(userId: string) {
-  return await orderRepo.orders(userId);
+  return await ordersRepo.orders(userId);
 }
 
 export async function exsName2() {

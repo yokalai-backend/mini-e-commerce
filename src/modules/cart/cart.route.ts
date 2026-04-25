@@ -1,11 +1,16 @@
 import { FastifyInstance } from "fastify";
 import validateParams from "@utils/preValidation/validate.params";
 import validateQuery from "@utils/preValidation/validate.query";
-import { productIdSchema } from "@products/products.schema";
-import { amountProductSchema } from "@products/products.schema";
-import { addToCart, getProductsCart } from "./cart.controller";
+import verifyToken from "@utils/token/verify.token";
 import validateBody from "@utils/preValidation/validate.body";
-import { getProductsSchema } from "./cart.schema";
+import { productIdSchema } from "@products/products.schema";
+import { productAmountSchema } from "@products/products.schema";
+import {
+  addProductsToCart,
+  addProductToCart,
+  getProductsCart,
+} from "./cart.controller";
+import { userCartSchema, addUserCartSchema } from "@cart/cart.schema";
 
 export default function cartRoute(app: FastifyInstance) {
   app.post(
@@ -13,21 +18,23 @@ export default function cartRoute(app: FastifyInstance) {
     {
       preValidation: [
         validateParams(productIdSchema),
-        validateQuery(amountProductSchema),
+        validateQuery(productAmountSchema),
       ],
     },
-    addToCart,
-  );
+    addProductToCart,
+  ); // This endpoint use for adding the product user has been added to the cart when the user already login.
+
+  app.post(
+    "/add",
+    {
+      preValidation: [verifyToken, validateBody(addUserCartSchema)],
+    },
+    addProductsToCart,
+  ); // Add all of the products the user have in their cart.
 
   app.post(
     "/",
-    { preValidation: validateBody(getProductsSchema) },
+    { preValidation: validateBody(addUserCartSchema) },
     getProductsCart,
-  );
-
-  app.delete("/ex", () => console.log("Example"));
-
-  app.patch("/ex", () => console.log("Example"));
-
-  app.put("/ex", () => console.log("Example"));
+  ); // This get all of the products from user's cart so then the FE could render the products image or show the information.
 }

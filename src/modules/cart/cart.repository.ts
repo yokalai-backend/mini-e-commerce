@@ -1,15 +1,18 @@
 // Don't forget to import the queries helper up here!
 import { AddToCart } from "@products/products.type";
-import { addToCartHelper, getCartProductsHelper } from "@repository/cart";
-import { GetProductsProps } from "./cart.schema";
+import {
+  addProductsToCartHelper,
+  addProductToCartHelper,
+  getCartProductsHelper,
+} from "@repository/cart";
+import { AddProductsProps, GetProductsProps } from "@cart/cart.schema";
 
 const cartRepo = {
-  addToCart: async (input: AddToCart) => addToCartHelper(input),
   getProductsCart: async (products: GetProductsProps) =>
     getCartProductsHelper(products),
-  exf3: async () => {
-    // Code goes here
-  },
+  addProductToCart: async (input: AddToCart) => addProductToCartHelper(input),
+  addProductsToCart: async (userId: string, products: AddProductsProps) =>
+    addProductsToCartHelper(userId, products),
   exf4: async () => {
     // Code goes here
   },
