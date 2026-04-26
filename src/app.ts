@@ -17,6 +17,7 @@ export default async function buildApp() {
   app.register(fastifyCors, {
     credentials: true,
     origin: "http://localhost:3000",
+    methods: ["DELETE", "POST", "GET", "UPDATE"],
   });
 
   app.register(authRoute, { prefix: "/auth" });

@@ -10,6 +10,8 @@ import {
   addProductToCart,
   getProductsCart,
   getUserCart,
+  removeCartById,
+  removeFromCart,
 } from "@cart/cart.controller";
 import { addUserCartSchema } from "@cart/cart.schema";
 
@@ -27,6 +29,14 @@ export default function cartRoute(app: FastifyInstance) {
   ); // This endpoint use for adding the product user has been added to the cart when the user already login.
 
   app.get("/", { preHandler: verifyToken }, getUserCart);
+
+  app.delete("/", { preHandler: verifyToken }, removeFromCart); // Remove products in cart.
+
+  app.delete(
+    "/:id",
+    { preValidation: validateParams(productIdSchema), preHandler: verifyToken },
+    removeCartById,
+  ); // Remove products in cart.
 
   app.post(
     "/add",

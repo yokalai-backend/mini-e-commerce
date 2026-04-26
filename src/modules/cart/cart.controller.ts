@@ -4,6 +4,8 @@ import {
   addProductToCartService,
   getProductsCartService,
   getUserCartService,
+  removeCartByIdService,
+  removeFromCartService,
 } from "@cart/cart.service";
 import { AddProductsProps, GetProductsProps } from "@cart/cart.schema";
 
@@ -20,6 +22,21 @@ export async function getProductsCart(
   const res = await getProductsCartService(req.body); // Return all of the information of the products that currently in user's cart, only if user haven't login yet.
 
   rep.ok("User's cart received successfuly", res);
+}
+
+export async function removeCartById(
+  req: FastifyRequest<{ Params: { id: string } }>,
+  rep: FastifyReply,
+) {
+  await removeCartByIdService(req.user.id, req.params.id);
+
+  rep.ok("Product removed from cart");
+}
+
+export async function removeFromCart(req: FastifyRequest, rep: FastifyReply) {
+  await removeFromCartService(req.user.id);
+
+  rep.ok("Cart has been cleaned up");
 }
 
 export async function addProductToCart(

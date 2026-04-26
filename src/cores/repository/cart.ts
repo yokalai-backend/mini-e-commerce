@@ -30,13 +30,9 @@ WHERE id = ANY($1::uuid[])`,
     [productsId],
   ); // Get all the product based on their ids.
 
-  console.log(productsInformation);
-
   const res = productsInformation.map((e) =>
     productsList[e.id] ? { ...e, amount: productsList[e.id] } : e,
   );
-
-  console.log(res);
 
   return res;
 }
@@ -63,6 +59,17 @@ WHERE id = ANY($1::uuid[])`,
   );
 
   return res;
+}
+
+export async function removeCartByIdHelper(userId: string, productId: string) {
+  return await queryOne<{ id: string }>(
+    `DELETE FROM user_cart WHERE product_id = $1 AND user_id = $2 RETURNING id`,
+    [productId, userId],
+  );
+}
+
+export async function removeFromCartHelper(userId: string) {
+  await queryOne(`DELETE FROM user_cart WHERE user_id = $1`, [userId]);
 }
 
 export async function addProductToCartHelper({
