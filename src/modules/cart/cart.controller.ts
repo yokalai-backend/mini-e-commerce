@@ -3,14 +3,21 @@ import {
   addProductsCartService,
   addProductToCartService,
   getProductsCartService,
+  getUserCartService,
 } from "@cart/cart.service";
 import { AddProductsProps, GetProductsProps } from "@cart/cart.schema";
+
+export async function getUserCart(req: FastifyRequest, rep: FastifyReply) {
+  const res = await getUserCartService(req.user.id);
+
+  return rep.ok("User's cart received successfuly", res);
+} // This only occured when the user already login.
 
 export async function getProductsCart(
   req: FastifyRequest<{ Body: GetProductsProps }>,
   rep: FastifyReply,
 ) {
-  const res = await getProductsCartService(req.body); // Return all of the information of the products that currently in user's cart.
+  const res = await getProductsCartService(req.body); // Return all of the information of the products that currently in user's cart, only if user haven't login yet.
 
   rep.ok("User's cart received successfuly", res);
 }

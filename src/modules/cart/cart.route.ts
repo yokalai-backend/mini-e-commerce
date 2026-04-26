@@ -9,13 +9,15 @@ import {
   addProductsToCart,
   addProductToCart,
   getProductsCart,
-} from "./cart.controller";
-import { userCartSchema, addUserCartSchema } from "@cart/cart.schema";
+  getUserCart,
+} from "@cart/cart.controller";
+import { addUserCartSchema } from "@cart/cart.schema";
 
 export default function cartRoute(app: FastifyInstance) {
   app.post(
     "/:id",
     {
+      preHandler: verifyToken,
       preValidation: [
         validateParams(productIdSchema),
         validateQuery(productAmountSchema),
@@ -24,10 +26,13 @@ export default function cartRoute(app: FastifyInstance) {
     addProductToCart,
   ); // This endpoint use for adding the product user has been added to the cart when the user already login.
 
+  app.get("/", { preHandler: verifyToken }, getUserCart);
+
   app.post(
     "/add",
     {
-      preValidation: [verifyToken, validateBody(addUserCartSchema)],
+      preValidation: validateBody(addUserCartSchema),
+      preHandler: verifyToken,
     },
     addProductsToCart,
   ); // Add all of the products the user have in their cart.

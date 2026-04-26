@@ -11,7 +11,7 @@ export async function productService(productId: string) {
 
   if (!res.id) throw Errors.notFound("Product not found");
 
-  return productsDetailsParser.parse(res);
+  return productDetailParser.parse(res);
 }
 
 export async function productsService({
@@ -23,7 +23,7 @@ export async function productsService({
 }) {
   const offset = (page - 1) * limit;
 
-  return productDetailParser.parse(
+  return productsDetailsParser.parse(
     await productsRepo.products({ limit, offset }),
   );
 }

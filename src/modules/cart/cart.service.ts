@@ -1,12 +1,15 @@
 import cartRepo from "@cart/cart.repository";
-import { AddToCart } from "@products/products.type";
+import { AddToCartProps } from "@products/products.type";
 import { AddProductsProps, GetProductsProps } from "@cart/cart.schema";
 
+export async function getUserCartService(userId: string) {
+  return await cartRepo.getUserCart(userId);
+}
 export async function getProductsCartService(products: GetProductsProps) {
   return await cartRepo.getProductsCart(products);
 }
 
-export async function addProductToCartService(input: AddToCart) {
+export async function addProductToCartService(input: AddToCartProps) {
   return await cartRepo.addProductToCart(input);
 }
 
@@ -15,12 +18,4 @@ export async function addProductsCartService(
   products: AddProductsProps,
 ) {
   return await cartRepo.addProductsToCart(userId, products);
-}
-
-export async function exsName4() {
-  // Code goes here
-}
-
-export async function exsName5() {
-  // Code goes here
 }
