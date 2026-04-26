@@ -1,11 +1,11 @@
-import fastify, { FastifyInstance } from "fastify";
-import authRoute from "./modules/auth/auth.route";
-import responseHandler from "./plugins/response.handler";
-import globalErrors from "./cores/errors/global.errors";
+import fastify from "fastify";
+import authRoute from "@auth/auth.route";
+import responseHandler from "@plugins/response.handler";
+import globalErrors from "@errors/global.errors";
 import cookie from "@fastify/cookie";
-import productsRoute from "./modules/products/products.route";
-import ordersRoute from "./modules/orders/orders.route";
-import cartRoute from "modules/cart/cart.route";
+import productsRoute from "@products/products.route";
+import ordersRoute from "@orders/orders.route";
+import cartRoute from "@cart/cart.route";
 import fastifyCors from "@fastify/cors";
 import userRoute from "@user/user.route";
 

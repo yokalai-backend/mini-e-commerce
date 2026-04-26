@@ -11,7 +11,8 @@
       "@orders/*": ["modules/orders/*"],
       "@repository/*": ["cores/repository/*"],
       "@shared/*": ["shared/*"],
-      "@cart/*": ["modules/cart/*"]
+      "@cart/*": ["modules/cart/*"],
+      "@plugins/*": ["plugins/*"]
     },
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
