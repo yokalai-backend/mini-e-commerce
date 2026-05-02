@@ -8,6 +8,9 @@ import ordersRoute from "@orders/orders.route";
 import cartRoute from "@cart/cart.route";
 import fastifyCors from "@fastify/cors";
 import userRoute from "@user/user.route";
+import multipart from "@fastify/multipart";
+import fastifyStatic from "@fastify/static";
+import path from "path";
 
 export default async function buildApp() {
   const app = fastify();
@@ -17,7 +20,16 @@ export default async function buildApp() {
   app.register(fastifyCors, {
     credentials: true,
     origin: "http://localhost:3000",
-    methods: ["DELETE", "POST", "GET", "UPDATE"],
+    methods: ["DELETE", "POST", "GET", "PUT", "PATCH"],
+  });
+  app.register(multipart, {
+    limits: {
+      fileSize: 5 * 1024 * 1024,
+    },
+  });
+  app.register(fastifyStatic, {
+    root: path.join(process.cwd(), "uploads"),
+    prefix: "/uploads/",
   });
 
   app.register(authRoute, { prefix: "/auth" });

@@ -1,5 +1,7 @@
 import pool from "@config/db";
 import Errors from "@errors/errors";
+import { UserOrderProps } from "@orders/orders.schema";
+import { queryMany } from "@utils/query/query";
 
 // This is where the crucial part is, so I use transaction query for this one.
 export async function orderProductsHelper(userId: string) {
@@ -65,8 +67,13 @@ export async function orderProductsHelper(userId: string) {
 
       await client.query(
         `UPDATE products 
-         SET stock = stock - $1 
+         SET stock = stock - $1
          WHERE id = $2`,
+        [item.quantity, item.product_id],
+      );
+
+      await client.query(
+        `UPDATE product_details SET total_solds = total_solds + $1 WHERE product_id = $2`,
         [item.quantity, item.product_id],
       );
     }
@@ -83,4 +90,59 @@ export async function orderProductsHelper(userId: string) {
   } finally {
     client.release();
   }
+}
+
+export async function userOrdersHelper(userId: string, orderId: string) {
+  const products = await queryMany<UserOrderProps>(
+    `
+    SELECT u.username AS owner_name, p.id AS product_id, p.name AS product_name, 
+    p.image, os.id AS order_id, os.total_price, os.status, os.created_at, oi.quantity, oi.subtotal, oi.price
+    FROM products p 
+    INNER JOIN order_items oi ON p.id = oi.product_id INNER JOIN orders os ON 
+    os.id = oi.order_id 
+    INNER JOIN users u
+    ON u.id = p.user_id
+    WHERE os.id = $1 AND os.user_id = $2`,
+    [orderId, userId],
+  );
+
+  const grouped = Object.values(
+    products.reduce(
+      (acc, row) => {
+        const orderId = row.order_id;
+
+        if (!acc[orderId]) {
+          acc[orderId] = {
+            orderId,
+            status: row.status,
+            totalPrice: row.total_price,
+            orderedAt: row.created_at,
+            items: [],
+          };
+        }
+
+        acc[orderId].items.push({
+          ownerName: row.owner_name,
+          productId: row.product_id,
+          productName: row.product_name,
+          productImage: row.image,
+          quantity: row.quantity,
+          productPrice: row.price,
+          subTotal: row.subtotal,
+        });
+
+        return acc;
+      },
+      {} as Record<string, any>,
+    ),
+  );
+
+  return grouped;
+}
+
+export async function ordersListHelper(userId: string) {
+  return await queryMany<{ id: string }>(
+    `SELECT id FROM orders WHERE user_id = $1`,
+    [userId],
+  );
 }

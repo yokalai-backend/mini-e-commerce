@@ -23,3 +23,26 @@ export type AddToCartProps = {
   productId: string;
   quantity: number;
 };
+
+export type CommentProps = {
+  comment_id: string;
+  id: string;
+  username: string;
+  comment: string;
+  likes_count: number;
+  created_at: string;
+  total: number;
+};
+
+export type ProductCategories = [
+  "Food",
+  "Electronics",
+  "Daily",
+  "Fashion",
+  "Cosmetics",
+  "Drinks",
+  "Entertainment",
+  "Pet",
+  "Service",
+  "Others",
+];

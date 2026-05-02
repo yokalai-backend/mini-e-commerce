@@ -3,10 +3,6 @@ import { AddToCartProps } from "@products/products.type";
 import { AddProductsProps, GetProductsProps } from "@cart/cart.schema";
 import Errors from "@errors/errors";
 
-export async function getUserCartService(userId: string) {
-  return await cartRepo.getUserCart(userId);
-}
-
 export async function getProductsCartService(products: GetProductsProps) {
   return await cartRepo.getProductsCart(products);
 }
@@ -30,4 +26,11 @@ export async function addProductsCartService(
   products: AddProductsProps,
 ) {
   return await cartRepo.addProductsToCart(userId, products);
+}
+
+export async function mergeUserCartService(
+  userId: string,
+  localCart: GetProductsProps,
+) {
+  return await cartRepo.mergeUserCart(userId, localCart);
 }

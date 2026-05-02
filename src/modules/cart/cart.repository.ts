@@ -4,15 +4,13 @@ import {
   addProductsToCartHelper,
   addProductToCartHelper,
   getCartProductsHelper,
-  getUserCartHelper,
+  mergeUserCartHelper,
   removeCartByIdHelper,
   removeFromCartHelper,
 } from "@repository/cart";
 import { AddProductsProps, GetProductsProps } from "@cart/cart.schema";
 
 const cartRepo = {
-  getUserCart: async (userId: string) => getUserCartHelper(userId),
-
   getProductsCart: async (products: GetProductsProps) =>
     getCartProductsHelper(products),
 
@@ -25,6 +23,9 @@ const cartRepo = {
 
   addProductsToCart: async (userId: string, products: AddProductsProps) =>
     addProductsToCartHelper(userId, products),
+
+  mergeUserCart: async (userId: string, localCart: GetProductsProps) =>
+    mergeUserCartHelper(userId, localCart),
 };
 
 export default cartRepo;

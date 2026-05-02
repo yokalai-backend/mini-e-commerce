@@ -13,3 +13,8 @@ export const userParser = z
   }));
 
 export type UserProps = z.infer<typeof userParser>;
+
+export const commentSchema = z.object({
+  comment: z.string().min(1, { error: "Comment can't be empty" }).trim(),
+  rate: z.number(),
+});

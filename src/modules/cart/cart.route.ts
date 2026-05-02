@@ -9,11 +9,11 @@ import {
   addProductsToCart,
   addProductToCart,
   getProductsCart,
-  getUserCart,
+  mergeUserCart,
   removeCartById,
   removeFromCart,
 } from "@cart/cart.controller";
-import { addUserCartSchema } from "@cart/cart.schema";
+import { addUserCartSchema, userCartSchema } from "@cart/cart.schema";
 
 export default function cartRoute(app: FastifyInstance) {
   app.post(
@@ -27,8 +27,6 @@ export default function cartRoute(app: FastifyInstance) {
     },
     addProductToCart,
   ); // This endpoint use for adding the product user has been added to the cart when the user already login.
-
-  app.get("/", { preHandler: verifyToken }, getUserCart);
 
   app.delete("/", { preHandler: verifyToken }, removeFromCart); // Remove products in cart.
 
@@ -52,4 +50,13 @@ export default function cartRoute(app: FastifyInstance) {
     { preValidation: validateBody(addUserCartSchema) },
     getProductsCart,
   ); // This get all of the products from user's cart so then the FE could render the products image or show the information.
+
+  app.post(
+    "/merge",
+    {
+      preValidation: validateBody(userCartSchema),
+      preHandler: verifyToken,
+    },
+    mergeUserCart,
+  ); // Merge user's real cart when already login with the current local cart.
 }

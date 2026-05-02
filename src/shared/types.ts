@@ -1,5 +1,4 @@
 // Here are i define all of the types i would use oftenly no matter what modules uses it.
-
 export type Roles = "user" | "admin"; // It's often used for auth and  jwt tokens.
 
 export interface PaginationProps {

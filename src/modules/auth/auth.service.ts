@@ -56,7 +56,8 @@ export async function logoutService(deviceId: string) {
 }
 
 export async function refreshTokenService(token: string, deviceId: string) {
-  if (!token || !deviceId) throw Errors.badRequest("Please login first");
+  console.error(token);
+  if (!token || !deviceId) throw Errors.authorization("Please login first");
 
   return await refreshTokenHelper(token, deviceId);
 }

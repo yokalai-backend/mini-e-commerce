@@ -1,4 +1,5 @@
-import { z } from "zod";
+import { transform, z } from "zod";
+import { countries } from "countries-list";
 
 export const productIdSchema = z.object({
   id: z.uuid(),
@@ -18,7 +19,9 @@ export const productDetailParser = z
     product_name: z.string(),
     price: z.coerce.number(),
     stock: z.coerce.number(),
-    image: z.url(),
+    image: z.union([z.url(), z.string().regex(/\.(jpg|jpeg|png)$/i)]),
+    created_at: z.date().optional(),
+    updated_at: z.union([z.date().optional(), z.null()]),
     send_from: z.string(),
     category: z.string(),
     rating: z.coerce.number(),
@@ -37,6 +40,8 @@ export const productDetailParser = z
       category: p.category,
       rating: p.rating,
       totalSolds: p.total_solds,
+      createdAt: p.created_at,
+      updatedAd: p.updated_at,
     },
     owner: {
       ownerId: p.owner_id,
@@ -44,19 +49,112 @@ export const productDetailParser = z
     },
   })); // A parser to only one product.
 
+export type ProductDetailParserProps = z.infer<typeof productDetailParser>;
+
 export const productsDetailsParser = z.array(productDetailParser); // This is parser for group of products in an array.
 
+const validCountries = Object.values(countries).map((e) =>
+  e.name.toLocaleLowerCase(),
+);
+
+export const validProductCategory = [
+  "Food",
+  "Electronics",
+  "Daily",
+  "Fashion",
+  "Cosmetics",
+  "Drinks",
+  "Entertainment",
+  "Pet",
+  "Service",
+  "Others",
+];
+
+export const validProductsOrder = [
+  "Cheapest",
+  "Most expensive",
+  "Newest",
+  "High rate",
+  "Low stock",
+];
+
+const orderMap: Record<(typeof validProductsOrder)[number], string> = {
+  Cheapest: "p.price ASC",
+  "Most expensive": "p.price DESC",
+  Newest: "p.created_at DESC",
+  "High rate": "pd.rating DESC",
+  "Low stock": "p.stock ASC",
+};
+
+export const productFilterSchema = z.object({
+  category: z.array(z.enum(validProductCategory).optional()),
+  order: z
+    .preprocess(
+      (val) => (val === "" ? undefined : val),
+      z
+        .enum(validProductsOrder)
+        .default("Newest")
+        .transform((e) => orderMap[e]),
+    )
+    .optional(),
+});
+
+export type ProductFilterProps = z.infer<typeof productFilterSchema>;
+
 export const addProductSchema = z.object({
-  name: z.string({ error: "Name of the product is needed" }),
+  name: z
+    .string()
+    .trim()
+    .min(10, { error: "Product name too short" })
+    .max(100, { error: "Product name too long" }),
   price: z.coerce
     .number({ error: "Price of the product is needed" })
     .min(1, { error: "Price can't be 0" }),
   stock: z.coerce
     .number({ error: "Stock of the product is needed" })
     .min(1, { error: "Stock can't be 0" }),
-  image: z.url({ error: "Image url of the product is needed" }),
-  sendFrom: z.string({ error: "Send from location of the product is needed" }),
-  category: z.string({ error: "Category of the product is needed" }),
+  category: z
+    .string()
+    .trim()
+    .superRefine((val, ctx) => {
+      if (!val) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Category of the product is needed",
+        });
+
+        return;
+      }
+
+      if (!validProductCategory.includes(val)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Invalid product category",
+        });
+      }
+    }),
+  image: z.union([z.url(), z.string().regex(/\.(jpg|jpeg|png)$/i)], {
+    error: "Only jpg, jpeg, png, url allowed",
+  }),
+  sendFrom: z
+    .string()
+    .trim()
+    .superRefine((val, ctx) => {
+      if (!val) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Sender location of the product is needed",
+        });
+        return;
+      }
+
+      if (!validCountries.includes(val.toLowerCase())) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Invalid country",
+        });
+      }
+    }),
 }); // A validation for adding self product.
 
 export type AddProductProps = z.infer<typeof addProductSchema>;

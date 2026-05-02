@@ -3,17 +3,11 @@ import {
   addProductsCartService,
   addProductToCartService,
   getProductsCartService,
-  getUserCartService,
+  mergeUserCartService,
   removeCartByIdService,
   removeFromCartService,
 } from "@cart/cart.service";
 import { AddProductsProps, GetProductsProps } from "@cart/cart.schema";
-
-export async function getUserCart(req: FastifyRequest, rep: FastifyReply) {
-  const res = await getUserCartService(req.user.id);
-
-  return rep.ok("User's cart received successfuly", res);
-} // This only occured when the user already login.
 
 export async function getProductsCart(
   req: FastifyRequest<{ Body: GetProductsProps }>,
@@ -62,4 +56,13 @@ export async function addProductsToCart(
   const res = await addProductsCartService(req.user.id, req.body);
 
   rep.ok("Successful added products to cart", res);
+}
+
+export async function mergeUserCart(
+  req: FastifyRequest<{ Body: GetProductsProps }>,
+  rep: FastifyReply,
+) {
+  const res = await mergeUserCartService(req.user.id, req.body);
+
+  rep.ok("Successful got user updated cart", res);
 }

@@ -8,35 +8,6 @@ import {
 } from "@cart/cart.schema";
 import { DatabaseError } from "pg";
 
-export async function getUserCartHelper(userId: string) {
-  const products = await queryMany<GetProductsProps>(
-    `SELECT * FROM user_cart WHERE user_id = $1`,
-    [userId],
-  );
-
-  const productsList = products.reduce((acc: any, e: any) => {
-    const key = e.product_id;
-
-    if (!acc[key]) acc[key] = e.quantity;
-
-    return acc;
-  }, {});
-
-  const productsId = products.map((e: any) => e.product_id); // Getting all the products id.
-
-  const productsInformation = await queryMany<ProductsProps>(
-    `SELECT id, name, price, stock, image FROM products
-WHERE id = ANY($1::uuid[])`,
-    [productsId],
-  ); // Get all the product based on their ids.
-
-  const res = productsInformation.map((e) =>
-    productsList[e.id] ? { ...e, amount: productsList[e.id] } : e,
-  );
-
-  return res;
-}
-
 export async function getCartProductsHelper(products: GetProductsProps) {
   const productsList = products.reduce((acc: any, e: any) => {
     const key = e.id;
@@ -139,4 +110,55 @@ export async function addProductsToCartHelper(
 
     throw error;
   }
+}
+
+export async function mergeUserCartHelper(
+  userId: string,
+  localCart: GetProductsProps,
+) {
+  if (localCart.length > 0) {
+    const params: any = [userId];
+    const values = [];
+
+    let index = 2;
+
+    for (let item of localCart) {
+      params.push(item.id, item.amount);
+
+      values.push(`($1, $${index++}, $${index++})`);
+    }
+
+    await queryOne(
+      `INSERT INTO user_cart (user_id, product_id, quantity) VALUES ${values.join(", ")} ON CONFLICT (user_id, product_id) DO UPDATE SET
+      quantity = EXCLUDED.quantity, updated_at = NOW()`,
+      params,
+    );
+  }
+
+  const products = await queryMany<GetProductsProps>(
+    `SELECT * FROM user_cart WHERE user_id = $1`,
+    [userId],
+  );
+
+  const productsList = products.reduce((acc: any, e: any) => {
+    const key = e.product_id;
+
+    if (!acc[key]) acc[key] = e.quantity;
+
+    return acc;
+  }, {});
+
+  const productsId = products.map((e: any) => e.product_id); // Getting all the products id.
+
+  const productsInformation = await queryMany<ProductsProps>(
+    `SELECT id, name, price, stock, image FROM products
+WHERE id = ANY($1::uuid[])`,
+    [productsId],
+  ); // Get all the product based on their ids.
+
+  const res = productsInformation.map((e) =>
+    productsList[e.id] ? { ...e, amount: productsList[e.id] } : e,
+  );
+
+  return res;
 }
