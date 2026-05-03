@@ -15,13 +15,17 @@ export async function userOrdersService(userId: string, orderId: string) {
 }
 
 export async function ordersListService(userId: string) {
-  return await ordersRepo.ordersList(userId);
+  const res = await ordersRepo.ordersList(userId);
+
+  if (!res.length) throw Errors.notFound("You don't have any orders yet");
+
+  return res;
 }
 
-export async function exsName4() {
-  // Code goes here
-}
+export async function userOrderItemsService(userId: string, productId: string) {
+  const res = await ordersRepo.userOrderItems(userId, productId);
 
-export async function exsName5() {
-  // Code goes here
+  if (!res) throw Errors.badRequest("No orders found");
+
+  return res;
 }

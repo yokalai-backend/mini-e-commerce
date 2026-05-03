@@ -1,5 +1,5 @@
 import { UserProps } from "@user/user.schema";
-import { queryOne } from "@utils/query/query";
+import { queryMany, queryOne } from "@utils/query/query";
 
 export async function userHelper(userId: string) {
   return await queryOne<UserProps>(
@@ -17,6 +17,25 @@ export async function addCommentHelper(
   await queryOne(
     `INSERT INTO comments (by_user, product_id, comment, rates) VALUES ($1, $2, $3, $4)`,
     [userId, productId, comment, rate],
+  );
+
+  const ratingData = await queryOne<{
+    avg: number;
+    total: number;
+  }>(
+    `SELECT AVG(rates) AS avg, COUNT(*) AS total 
+   FROM comments 
+   WHERE product_id = $1 AND rates != 0`,
+    [productId],
+  );
+
+  if (!ratingData.avg || !ratingData.total) return;
+
+  await queryOne(
+    `UPDATE product_details 
+   SET rating = $1, total_reviews = $2 
+   WHERE product_id = $3`,
+    [ratingData.avg, ratingData.total, productId],
   );
 }
 

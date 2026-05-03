@@ -6,9 +6,9 @@ async function server() {
 
     await app.ready();
 
-    app.listen({ port: 5000 });
+    await app.listen({ port: 5000, host: "0.0.0.0" });
 
-    console.log("Server is running in port 5000");
+    console.log("Server is running");
   } catch (error) {
     console.error(error);
     process.exit(1);

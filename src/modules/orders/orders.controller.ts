@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import {
   ordersListService,
   ordersService,
+  userOrderItemsService,
   userOrdersService,
 } from "@orders/orders.service";
 
@@ -24,4 +25,13 @@ export async function ordersList(req: FastifyRequest, rep: FastifyReply) {
   const res = await ordersListService(req.user.id);
 
   rep.ok("User orders list received", res);
+}
+
+export async function userOrderItems(
+  req: FastifyRequest<{ Params: { id: string } }>,
+  rep: FastifyReply,
+) {
+  await userOrderItemsService(req.user.id, req.params.id);
+
+  rep.ok("Order exists");
 }

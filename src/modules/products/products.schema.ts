@@ -26,6 +26,7 @@ export const productDetailParser = z
     category: z.string(),
     rating: z.coerce.number(),
     total_solds: z.coerce.number(),
+    total_reviews: z.coerce.number().optional(),
   })
   .transform((p) => ({
     product: {
@@ -40,6 +41,7 @@ export const productDetailParser = z
       category: p.category,
       rating: p.rating,
       totalSolds: p.total_solds,
+      totalReviews: p.total_reviews,
       createdAt: p.created_at,
       updatedAd: p.updated_at,
     },
@@ -74,7 +76,7 @@ export const validProductsOrder = [
   "Cheapest",
   "Most expensive",
   "Newest",
-  "High rate",
+  "High rates",
   "Low stock",
 ];
 
@@ -82,7 +84,7 @@ const orderMap: Record<(typeof validProductsOrder)[number], string> = {
   Cheapest: "p.price ASC",
   "Most expensive": "p.price DESC",
   Newest: "p.created_at DESC",
-  "High rate": "pd.rating DESC",
+  "High rates": "pd.rating DESC",
   "Low stock": "p.stock ASC",
 };
 
@@ -106,7 +108,7 @@ export const addProductSchema = z.object({
     .string()
     .trim()
     .min(10, { error: "Product name too short" })
-    .max(100, { error: "Product name too long" }),
+    .max(200, { error: "Product name too long" }),
   price: z.coerce
     .number({ error: "Price of the product is needed" })
     .min(1, { error: "Price can't be 0" }),

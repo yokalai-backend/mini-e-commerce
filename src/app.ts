@@ -15,21 +15,43 @@ import path from "path";
 export default async function buildApp() {
   const app = fastify();
 
-  app.register(responseHandler);
-  app.register(cookie);
   app.register(fastifyCors, {
     credentials: true,
-    origin: "http://localhost:3000",
-    methods: ["DELETE", "POST", "GET", "PUT", "PATCH"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "ngrok-skip-browser-warning", // ← ini yang kurang
+    ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    origin: [
+      "http://192.168.1.9:3000",
+      "http://localhost:3000",
+      "https://myfirstminiecommercefrontendpart.vercel.app",
+    ],
   });
+
+  app.addHook("onRequest", async (req) => {
+    console.log("REQ:", req.method, req.url);
+  });
+
+  app.register(responseHandler);
+  app.register(cookie);
+
   app.register(multipart, {
     limits: {
       fileSize: 5 * 1024 * 1024,
     },
   });
+
   app.register(fastifyStatic, {
     root: path.join(process.cwd(), "uploads"),
     prefix: "/uploads/",
+    setHeaders(res) {
+      res.setHeader(
+        "Access-Control-Allow-Origin",
+        "https://myfirstminiecommercefrontendpart.vercel.app",
+      );
+    },
   });
 
   app.register(authRoute, { prefix: "/auth" });

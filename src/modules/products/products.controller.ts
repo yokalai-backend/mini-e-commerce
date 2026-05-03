@@ -7,7 +7,6 @@ import {
   productsService,
 } from "@products/products.service";
 import { AddProductProps, ProductFilterProps } from "@products/products.schema";
-import { ProductCategories } from "./products.type";
 
 export async function product(
   req: FastifyRequest<{

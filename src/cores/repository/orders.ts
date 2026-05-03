@@ -1,7 +1,7 @@
 import pool from "@config/db";
 import Errors from "@errors/errors";
 import { UserOrderProps } from "@orders/orders.schema";
-import { queryMany } from "@utils/query/query";
+import { queryMany, queryOne } from "@utils/query/query";
 
 // This is where the crucial part is, so I use transaction query for this one.
 export async function orderProductsHelper(userId: string) {
@@ -144,5 +144,12 @@ export async function ordersListHelper(userId: string) {
   return await queryMany<{ id: string }>(
     `SELECT id FROM orders WHERE user_id = $1`,
     [userId],
+  );
+}
+
+export async function userOrderItemsHelper(userId: string, productId: string) {
+  return await queryOne(
+    `SELECT oi.id FROM order_items oi INNER JOIN orders o ON o.id = oi.order_id WHERE user_id = $1 AND product_id = $2`,
+    [userId, productId],
   );
 }

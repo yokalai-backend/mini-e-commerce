@@ -1,4 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import { cookiesPrefences } from "@config/cookies";
 import crypto from "crypto";
 
 // Generate a unique device id for supporting multi device login, generate new if user doesn't have one or it's been expired where the life session is 30 days.
@@ -12,10 +13,7 @@ export default function generateDeviceId(
     deviceId = crypto.randomUUID();
 
     rep.setCookie("deviceId", deviceId, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      ...cookiesPrefences.production,
       maxAge: 60 * 60 * 24 * 30,
     });
   }

@@ -7,6 +7,7 @@ import {
   registerService,
 } from "@auth/auth.service";
 import { LoginInput, RegisterInput } from "@auth/auth.types";
+import { cookiesPrefences } from "@config/cookies";
 
 export async function register(
   req: FastifyRequest<{ Body: RegisterInput }>,
@@ -24,25 +25,22 @@ export async function login(
 ) {
   const deviceId = generateDeviceId(req, rep); // Make the device id unique per client/domain.
 
-  const { accessToken, refreshToken } = await loginService(req.body, deviceId);
+  const {
+    result,
+    tokens: { accessToken, refreshToken },
+  } = await loginService(req.body, deviceId);
 
   rep.setCookie("accessToken", accessToken, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    ...cookiesPrefences.production,
     maxAge: 60 * 15,
   });
 
   rep.setCookie("refreshToken", refreshToken, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    ...cookiesPrefences.production,
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  rep.ok("Login successful");
+  rep.ok("Login successful", result);
 }
 
 export async function logout(req: FastifyRequest, rep: FastifyReply) {
@@ -51,17 +49,11 @@ export async function logout(req: FastifyRequest, rep: FastifyReply) {
   await logoutService(deviceId);
 
   rep.clearCookie("accessToken", {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    ...cookiesPrefences.production,
   });
 
   rep.clearCookie("refreshToken", {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    ...cookiesPrefences.production,
   });
 
   rep.ok("Logout successful");
@@ -78,18 +70,12 @@ export async function refreshToken(req: FastifyRequest, rep: FastifyReply) {
   );
 
   rep.setCookie("accessToken", newAccessToken, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    ...cookiesPrefences.dev,
     maxAge: 60 * 15,
   });
 
   rep.setCookie("refreshToken", newRefreshToken, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    ...cookiesPrefences.dev,
     maxAge: 60 * 60 * 24 * 7,
   });
 

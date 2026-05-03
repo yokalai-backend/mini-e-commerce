@@ -45,7 +45,12 @@ export async function loginService(input: LoginInput, deviceId: string) {
 
   const { hash, ...payload } = result;
 
-  return await handleLogin(payload, deviceId);
+  const tokens = await handleLogin(payload, deviceId);
+
+  return {
+    result: { id: result.id, username: result.username, role: result.role },
+    tokens,
+  };
 }
 
 export async function logoutService(deviceId: string) {

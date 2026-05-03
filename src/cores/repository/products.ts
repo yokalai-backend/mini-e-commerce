@@ -5,17 +5,13 @@ import {
   ProductDetailParserProps,
   ProductFilterProps,
 } from "@products/products.schema";
-import {
-  CommentProps,
-  ProductCategories,
-  ProductsProps,
-} from "@products/products.type";
+import { CommentProps, ProductsProps } from "@products/products.type";
 
 export async function productHelper(productId: string) {
   const result = await queryOne<ProductDetailParserProps>(
     `
     SELECT u.id AS owner_id, u.username AS owner_name, p.id AS product_id, p.name AS product_name, p.price, p.stock, p.image, p.created_at, p.updated_at,
-    pd.category, pd.send_from, pd.rating, pd.total_solds FROM users u LEFT JOIN
+    pd.category, pd.send_from, pd.rating, pd.total_reviews, pd.total_solds FROM users u LEFT JOIN
     products p ON u.id = p.user_id LEFT JOIN product_details pd ON pd.product_id = p.id
     WHERE u.is_active = true AND p.is_sold = false AND p.id = $1::uuid
     `,
@@ -28,7 +24,7 @@ export async function productsHelper({ limit, offset }: PaginationProps) {
   return await queryMany<ProductsProps>(
     `SELECT u.id AS owner_id, u.username AS owner_name, p.id AS product_id, p.name AS product_name, p.price, p.stock, p.image,
     pd.category, pd.send_from, pd.rating, pd.total_solds FROM users u INNER JOIN products p ON u.id = p.user_id INNER JOIN
-    product_details pd ON pd.product_id = p.id WHERE p.is_sold = false AND u.is_active = true ORDER BY pd.rating DESC LIMIT $1 OFFSET $2`,
+    product_details pd ON pd.product_id = p.id WHERE p.is_sold = false AND u.is_active = true ORDER BY p.created_at DESC LIMIT $1 OFFSET $2`,
     [limit, offset],
   );
 }
@@ -37,7 +33,6 @@ export async function productsByFilterHelper(
   { limit, offset }: PaginationProps,
   filters: ProductFilterProps,
 ) {
-  console.log(filters);
   if (filters.category.length <= 0) {
     return await queryMany<ProductsProps>(
       `SELECT u.id AS owner_id, u.username AS owner_name, p.id AS product_id, p.name AS product_name, p.price, p.stock, p.image,
@@ -54,8 +49,6 @@ export async function productsByFilterHelper(
     [filters.category, limit, offset],
   );
 
-  console.log(res);
-
   return res;
 }
 
@@ -70,7 +63,8 @@ export async function addProductHelper(
 
   const isHttps = image.startsWith("https");
 
-  if (!isHttps) path = `http://localhost:5000/uploads/${image}`;
+  if (!isHttps)
+    path = `https://projector-devious-spray.ngrok-free.dev/uploads/${image}`;
 
   try {
     const res = await queryOne<{ image: string }>(

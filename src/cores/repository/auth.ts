@@ -25,7 +25,7 @@ export async function loginHelper(input: LoginInput) {
     hash: string;
   }>(
     `SELECT id, username, role, hash FROM users WHERE email = $1 AND is_active = true`,
-    [email], // Only able to login if the user still active.
+    [email],
   );
 }
 
